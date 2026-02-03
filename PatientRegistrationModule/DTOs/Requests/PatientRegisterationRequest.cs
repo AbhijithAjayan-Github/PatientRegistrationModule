@@ -14,7 +14,7 @@ namespace PatientRegistrationModule.DTOs.Requests
         public string? Email { get; set; }
 
         [Required(ErrorMessage = "Gender is required")]
-        [EnumDataType(typeof(Gender), ErrorMessage = "Gender must be Male, Female or Others")]
+        [EnumDataType(typeof(Gender), ErrorMessage = "Gender must be Male(0), Female(1) or Others(3)")]
         public Gender Gender { get; set; }
         [Required]
         public DateOnly DateOfBirth { get; set; }
