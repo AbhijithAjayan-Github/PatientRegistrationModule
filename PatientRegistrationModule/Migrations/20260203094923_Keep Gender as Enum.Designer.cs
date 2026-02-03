@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PatientRegistrationModule.Data;
 
@@ -11,9 +12,11 @@ using PatientRegistrationModule.Data;
 namespace PatientRegistrationModule.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260203094923_Keep Gender as Enum")]
+    partial class KeepGenderasEnum
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -87,6 +90,7 @@ namespace PatientRegistrationModule.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("PatientCode")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("PinCode")
@@ -108,8 +112,7 @@ namespace PatientRegistrationModule.Migrations
                         .IsUnique();
 
                     b.HasIndex("PatientCode")
-                        .IsUnique()
-                        .HasFilter("[PatientCode] IS NOT NULL");
+                        .IsUnique();
 
                     b.ToTable("Patients");
                 });

@@ -99,6 +99,15 @@ namespace PatientRegistrationModule.Services
         public async Task<PatientRegisterationResponse> Register(PatientRegisterationRequest request)
         {
             PatientRegisterationResponse response = new PatientRegisterationResponse();
+            var isOtpVerified = await dbContext.OTPVerifications
+                                    .FirstOrDefaultAsync(p => p.Mobile == request.Mobile && p.IsVerified);
+
+            if (isOtpVerified == null)
+            {
+                response.Sucess = false;
+                response.Message = "Patient is not OTP verified, Please go through OTP Verification";
+                return response;
+            }
             var alreadyRegistered = await dbContext.Patients.FirstOrDefaultAsync(p => p.Mobile == request.Mobile);
             if (alreadyRegistered != null)
             {
@@ -108,10 +117,8 @@ namespace PatientRegistrationModule.Services
                 response.PatientCode = alreadyRegistered.PatientCode;
                 return response;
             }
-            string patientCode = await GeneratePatientCode();
             Patient patient = new Patient
             {
-                PatientCode = patientCode,
                 FullName = request.FullName,
                 Email = request.Email,
                 Mobile = request.Mobile,
@@ -121,9 +128,11 @@ namespace PatientRegistrationModule.Services
                 State = request.State,
                 City = request.City,
                 PinCode = request.Pincode,
-                CreatedDate = DateTime.Now,                
+                CreatedDate = DateTime.UtcNow ,                
             };
             await dbContext.Patients.AddAsync(patient);
+            await dbContext.SaveChangesAsync();
+            patient.PatientCode = await GeneratePatientCode(patient.PatientId);
             await dbContext.SaveChangesAsync();
             response.Sucess = true;
             response.Message = $"Successfully registered the patient {patient.FullName}";
@@ -131,12 +140,11 @@ namespace PatientRegistrationModule.Services
             response.PatientCode = patient.PatientCode;
             return response;
         }
-        public async Task<string>GeneratePatientCode()
+        public async Task<string>GeneratePatientCode(int patientId)
         {
             string patientCode = string.Empty;
             string prefix = $"PAT{DateTime.Now.Year}";
-            var nextVal = await dbContext.Database.SqlQuery<int>($"SELECT NEXT VALUE FOR PatientCodeSeq").SingleAsync();
-            patientCode = $"{prefix}{nextVal:D3}";
+            patientCode = $"{prefix}{patientId:D3}";
             return patientCode;
         }
     }

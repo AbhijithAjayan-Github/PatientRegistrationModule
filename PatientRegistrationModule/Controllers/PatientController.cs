@@ -43,6 +43,7 @@ namespace PatientRegistrationModule.Controllers
         {
             if (patient.DateOfBirth > DateOnly.FromDateTime(DateTime.Now)) throw new ValidationException("Date of birth should be in the past");
             PatientRegisterationResponse response = new PatientRegisterationResponse();
+            response = await patientService.Register(patient);  
             return Ok(response);
         }
     }

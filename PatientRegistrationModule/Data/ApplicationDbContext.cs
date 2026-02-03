@@ -14,7 +14,7 @@ namespace PatientRegistrationModule.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Patient>().Property(p=>p.Gender).HasConversion<string>();
+            //modelBuilder.Entity<Patient>().Property(p=>p.Gender).HasConversion<string>();
             modelBuilder.Entity<Patient>().HasIndex(p => p.Mobile).IsUnique();
             modelBuilder.Entity<Patient>().HasIndex(p => p.Email).IsUnique();
             modelBuilder.Entity<Patient>().HasIndex(p=> p.PatientCode).IsUnique();
