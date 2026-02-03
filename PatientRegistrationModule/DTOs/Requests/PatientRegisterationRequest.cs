@@ -9,7 +9,7 @@ namespace PatientRegistrationModule.DTOs.Requests
         public string FullName { get; set; }
 
         [Required(ErrorMessage ="Phone is required")]
-        [RegularExpression(@"^\d{10}$")]
+        [RegularExpression(@"^\d{10}$",ErrorMessage ="Enter a valid Phone number")]
         public string Mobile {  get; set; }
         public string? Email { get; set; }
 

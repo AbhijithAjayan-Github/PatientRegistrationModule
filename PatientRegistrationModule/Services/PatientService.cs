@@ -95,6 +95,49 @@ namespace PatientRegistrationModule.Services
             response.Message = $"Successfully verified the mobile number {request.Mobile}";
             return response;
         }
-
+        
+        public async Task<PatientRegisterationResponse> Register(PatientRegisterationRequest request)
+        {
+            PatientRegisterationResponse response = new PatientRegisterationResponse();
+            var alreadyRegistered = await dbContext.Patients.FirstOrDefaultAsync(p => p.Mobile == request.Mobile);
+            if (alreadyRegistered != null)
+            {
+                response.Sucess = true;
+                response.Message = "Patient is already registered";
+                response.PatientId = alreadyRegistered.PatientId;
+                response.PatientCode = alreadyRegistered.PatientCode;
+                return response;
+            }
+            string patientCode = await GeneratePatientCode();
+            Patient patient = new Patient
+            {
+                PatientCode = patientCode,
+                FullName = request.FullName,
+                Email = request.Email,
+                Mobile = request.Mobile,
+                Gender = request.Gender,
+                Address = request.Address,
+                DateOfBirth = request.DateOfBirth,
+                State = request.State,
+                City = request.City,
+                PinCode = request.Pincode,
+                CreatedDate = DateTime.Now,                
+            };
+            await dbContext.Patients.AddAsync(patient);
+            await dbContext.SaveChangesAsync();
+            response.Sucess = true;
+            response.Message = $"Successfully registered the patient {patient.FullName}";
+            response.PatientId = patient.PatientId;
+            response.PatientCode = patient.PatientCode;
+            return response;
+        }
+        public async Task<string>GeneratePatientCode()
+        {
+            string patientCode = string.Empty;
+            string prefix = $"PAT{DateTime.Now.Year}";
+            var nextVal = await dbContext.Database.SqlQuery<int>($"SELECT NEXT VALUE FOR PatientCodeSeq").SingleAsync();
+            patientCode = $"{prefix}{nextVal:D3}";
+            return patientCode;
+        }
     }
 }
