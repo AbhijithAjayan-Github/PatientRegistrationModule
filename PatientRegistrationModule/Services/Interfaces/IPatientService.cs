@@ -1,5 +1,6 @@
 ﻿using PatientRegistrationModule.DTOs.Requests;
 using PatientRegistrationModule.DTOs.Responses;
+using PatientRegistrationModule.Models;
 
 namespace PatientRegistrationModule.Services.Interfaces
 {
@@ -9,5 +10,6 @@ namespace PatientRegistrationModule.Services.Interfaces
         Task<VerifyOtpResponse> VerifyOTP(VerifyOtpRequest request);
         Task<PatientRegisterationResponse>Register(PatientRegisterationRequest request);
         Task<string> GeneratePatientCode(int patientId);
+        Task<GetPatientResponse> GetPatient(int patientId);
     }
 }

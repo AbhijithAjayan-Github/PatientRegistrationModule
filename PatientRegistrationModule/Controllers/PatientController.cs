@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using PatientRegistrationModule.DTOs.Requests;
 using PatientRegistrationModule.DTOs.Responses;
+using PatientRegistrationModule.Models;
 using PatientRegistrationModule.Services.Interfaces;
 using System.ComponentModel.DataAnnotations;
+using System.Threading.Tasks;
 
 namespace PatientRegistrationModule.Controllers
 {
@@ -46,5 +48,14 @@ namespace PatientRegistrationModule.Controllers
             response = await patientService.Register(patient);  
             return Ok(response);
         }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetPatient(int id)
+        {
+            GetPatientResponse response = new GetPatientResponse();
+            response = await patientService.GetPatient(id); 
+            return Ok(response);
+        }
+
     }
 }

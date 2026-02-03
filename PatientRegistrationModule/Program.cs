@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using PatientRegistrationModule.Data;
 using PatientRegistrationModule.Middlewares;
 using PatientRegistrationModule.Services;
+using PatientRegistrationModule.Services.Helpers;
 using PatientRegistrationModule.Services.Interfaces;
 
 namespace PatientRegistrationModule
@@ -23,6 +24,7 @@ namespace PatientRegistrationModule
             options.UseSqlServer(builder.Configuration.GetConnectionString("MSSQL")));
             builder.Services.AddExceptionHandler<AppExceptionHandler>();
             builder.Services.AddScoped<IPatientService, PatientService>();
+            builder.Services.AddSingleton<TimeZoneHelper>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

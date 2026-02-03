@@ -1,9 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Azure;
+using Microsoft.EntityFrameworkCore;
 using PatientRegistrationModule.Data;
 using PatientRegistrationModule.DTOs.Requests;
 using PatientRegistrationModule.DTOs.Responses;
 using PatientRegistrationModule.Models;
+using PatientRegistrationModule.Services.Helpers;
 using PatientRegistrationModule.Services.Interfaces;
+using System.Text.Json;
 
 namespace PatientRegistrationModule.Services
 {
@@ -12,10 +15,12 @@ namespace PatientRegistrationModule.Services
         private readonly IConfiguration configuration;
         private readonly ILogger<PatientService> logger;
         private readonly ApplicationDbContext dbContext;
-        public PatientService(ApplicationDbContext dbContext, IConfiguration configuration, ILogger<PatientService> logger)
+        private readonly TimeZoneHelper timeZoneHelper;
+        public PatientService(ApplicationDbContext dbContext, IConfiguration configuration, ILogger<PatientService> logger,TimeZoneHelper timeZoneHelper)
         {
             this.dbContext = dbContext;
             this.configuration = configuration;
+            this.timeZoneHelper = timeZoneHelper;
             this.logger = logger;
         }
 
@@ -31,6 +36,7 @@ namespace PatientRegistrationModule.Services
                 response.Success = true;
                 response.Mobile = request.Mobile;
                 response.Message = "Patient is already verified";
+                logger.LogInformation($"Already verified patient : {JsonSerializer.Serialize(response)}");
                 return response;
             }
             var otpInfo = await dbContext.OTPVerifications.FirstOrDefaultAsync(info => info.Mobile == request.Mobile);
@@ -49,7 +55,7 @@ namespace PatientRegistrationModule.Services
             response.Message = "Sucessfully Send OTP";
             response.Mobile = request.Mobile;
             response.OTP = otp;
-            logger.LogInformation($"OTP of patient {request.Mobile} : {otp}");
+            logger.LogInformation($"Sending OTP : {JsonSerializer.Serialize(response)}");
             return response;
         }
 
@@ -65,6 +71,7 @@ namespace PatientRegistrationModule.Services
                 response.Success = true;
                 response.Mobile = request.Mobile;
                 response.Message = "Patient is already verified";
+                logger.LogInformation($"Already verified patient : {JsonSerializer.Serialize(response)}");
                 return response;
             }
 
@@ -76,6 +83,7 @@ namespace PatientRegistrationModule.Services
                 response.Success = false;
                 response.Mobile = request.Mobile;
                 response.Message = "Invalid OTP.";
+                logger.LogInformation($"Invalid OTP : {JsonSerializer.Serialize(response)}");
                 return response;
             }
 
@@ -84,6 +92,7 @@ namespace PatientRegistrationModule.Services
                 response.Success = false;
                 response.Mobile = request.Mobile;
                 response.Message = "OTP has expired.";
+                logger.LogInformation($" Expired OTP : {JsonSerializer.Serialize(response)}");
                 return response;
             }
 
@@ -93,6 +102,7 @@ namespace PatientRegistrationModule.Services
             response.Success = true;
             response.Mobile = request.Mobile;
             response.Message = $"Successfully verified the mobile number {request.Mobile}";
+            logger.LogInformation($"Verified OTP Successfully : {JsonSerializer.Serialize(response)}");
             return response;
         }
         
@@ -106,6 +116,7 @@ namespace PatientRegistrationModule.Services
             {
                 response.Sucess = false;
                 response.Message = "Patient is not OTP verified, Please go through OTP Verification";
+                logger.LogInformation($"Registeration Failed  : {JsonSerializer.Serialize(response)}");
                 return response;
             }
             var alreadyRegistered = await dbContext.Patients.FirstOrDefaultAsync(p => p.Mobile == request.Mobile);
@@ -115,6 +126,7 @@ namespace PatientRegistrationModule.Services
                 response.Message = "Patient is already registered";
                 response.PatientId = alreadyRegistered.PatientId;
                 response.PatientCode = alreadyRegistered.PatientCode;
+                logger.LogInformation($"Already Registered Patient : {JsonSerializer.Serialize(response)}");
                 return response;
             }
             Patient patient = new Patient
@@ -138,6 +150,7 @@ namespace PatientRegistrationModule.Services
             response.Message = $"Successfully registered the patient {patient.FullName}";
             response.PatientId = patient.PatientId;
             response.PatientCode = patient.PatientCode;
+            logger.LogInformation($"Registered Patient : {JsonSerializer.Serialize(response)}");
             return response;
         }
         public async Task<string>GeneratePatientCode(int patientId)
@@ -145,7 +158,35 @@ namespace PatientRegistrationModule.Services
             string patientCode = string.Empty;
             string prefix = $"PAT{DateTime.Now.Year}";
             patientCode = $"{prefix}{patientId:D3}";
+            logger.LogInformation($"Generated PatientCode : {patientCode}");
             return patientCode;
+        }
+        
+        public async Task<GetPatientResponse> GetPatient(int patientId)
+        {
+            GetPatientResponse response = new GetPatientResponse();
+            var patient = await dbContext.Patients.Where(p => p.PatientId == patientId).Select(p => new Patient
+            {
+                PatientId = p.PatientId,
+                PatientCode = p.PatientCode,
+                FullName = p.FullName,
+                Email = p.Email,
+                Mobile = p.Mobile,
+                DateOfBirth = p.DateOfBirth,
+                Address = p.Address,
+                Gender = p.Gender,
+                State = p.State,
+                City = p.City,
+                PinCode = p.PinCode,
+                CreatedDate = timeZoneHelper.ConvertToLocalTime(p.CreatedDate),
+                UpdatedDate = timeZoneHelper.ConvertToLocalTime(p.UpdatedDate)
+            }).FirstOrDefaultAsync();
+            if (patient == null) throw new KeyNotFoundException($"Patient Not found with id {patientId}");
+            response.Success = true;
+            response.Message = "Succesfully fetched Patient";
+            response.patient = patient;
+            logger.LogInformation($"Fetching Patient : {JsonSerializer.Serialize(patient)}");
+            return response;
         }
     }
 }
