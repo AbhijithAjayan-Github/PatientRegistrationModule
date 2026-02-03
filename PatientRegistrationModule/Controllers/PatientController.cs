@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PatientRegistrationModule.DTOs.Requests;
 using PatientRegistrationModule.DTOs.Responses;
 using PatientRegistrationModule.Services.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace PatientRegistrationModule.Controllers
 {
@@ -33,6 +34,15 @@ namespace PatientRegistrationModule.Controllers
         {
             VerifyOtpResponse response = new VerifyOtpResponse();
             response = await patientService.VerifyOTP(request);
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Route("register")]
+        public async Task<IActionResult>Register(PatientRegisterationRequest patient)
+        {
+            if (patient.DateOfBirth > DateOnly.FromDateTime(DateTime.Now)) throw new ValidationException("Date of birth should be in the past");
+            PatientRegisterationResponse response = new PatientRegisterationResponse();
             return Ok(response);
         }
     }

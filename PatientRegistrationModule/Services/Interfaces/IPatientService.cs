@@ -7,5 +7,6 @@ namespace PatientRegistrationModule.Services.Interfaces
     {
         Task<SendOtpResponse> SendOTP(SendOtpRequest request);
         Task<VerifyOtpResponse> VerifyOTP(VerifyOtpRequest request);
+        //Task<PatientRegisterationResponse>Register(PatientRegisterationRequest request);
     }
 }
