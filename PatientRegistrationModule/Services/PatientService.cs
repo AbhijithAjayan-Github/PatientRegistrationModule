@@ -39,7 +39,6 @@ namespace PatientRegistrationModule.Services
                 logger.LogInformation($"Already verified patient : {JsonSerializer.Serialize(response)}");
                 return response;
             }
-            var otpInfo = await dbContext.OTPVerifications.FirstOrDefaultAsync(info => info.Mobile == request.Mobile);
             OTPVerification otpDetails = new OTPVerification
             {
                 Mobile = request.Mobile,

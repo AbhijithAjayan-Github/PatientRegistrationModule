@@ -36,6 +36,7 @@ namespace PatientRegistrationModule.Controllers
         {
             VerifyOtpResponse response = new VerifyOtpResponse();
             response = await patientService.VerifyOTP(request);
+            if (!response.Success) return BadRequest(response);
             return Ok(response);
         }
 
@@ -45,7 +46,8 @@ namespace PatientRegistrationModule.Controllers
         {
             if (patient.DateOfBirth > DateOnly.FromDateTime(DateTime.Now)) throw new ValidationException("Date of birth should be in the past");
             PatientRegisterationResponse response = new PatientRegisterationResponse();
-            response = await patientService.Register(patient);  
+            response = await patientService.Register(patient);
+            if (!response.Sucess) return BadRequest(response);
             return Ok(response);
         }
 
@@ -53,7 +55,7 @@ namespace PatientRegistrationModule.Controllers
         public async Task<IActionResult> GetPatient(int id)
         {
             GetPatientResponse response = new GetPatientResponse();
-            response = await patientService.GetPatient(id); 
+            response = await patientService.GetPatient(id);
             return Ok(response);
         }
 
