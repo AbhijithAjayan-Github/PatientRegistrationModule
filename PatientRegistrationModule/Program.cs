@@ -1,6 +1,9 @@
 
 using Microsoft.EntityFrameworkCore;
 using PatientRegistrationModule.Data;
+using PatientRegistrationModule.Middlewares;
+using PatientRegistrationModule.Services;
+using PatientRegistrationModule.Services.Interfaces;
 
 namespace PatientRegistrationModule
 {
@@ -18,6 +21,8 @@ namespace PatientRegistrationModule
             builder.Services.AddSwaggerGen();
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("MSSQL")));
+            builder.Services.AddExceptionHandler<AppExceptionHandler>();
+            builder.Services.AddScoped<IPatientService, PatientService>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -28,7 +33,7 @@ namespace PatientRegistrationModule
             }
 
             app.UseHttpsRedirection();
-
+            app.UseExceptionHandler(_ => { });
             app.UseAuthorization();
 
 
